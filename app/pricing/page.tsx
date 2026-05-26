@@ -8,6 +8,11 @@ export default function PricingPage() {
     setLoading(true)
     try {
       const res = await fetch('/api/stripe/checkout', { method: 'POST' })
+      if (res.status === 401) {
+        // Not logged in — redirect to signup first
+        window.location.href = '/?signup=true&next=pricing'
+        return
+      }
       const { url, error } = await res.json()
       if (error) { alert(error); setLoading(false); return }
       window.location.href = url
