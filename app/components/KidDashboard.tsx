@@ -31,7 +31,7 @@ const celebrations = [
 
 interface Confetti { id: number; x: number; y: number; color: string; size: number; round: boolean; delay: number }
 
-export default function KidDashboard({ onNavigate }: { onNavigate: (s: string) => void }) {
+export default function KidDashboard({ onNavigate, kidData }: { onNavigate: (s: string) => void; kidData?: any }) {
   const [tasks, setTasks] = useState(initialTasks)
   const [totalStars, setTotalStars] = useState(47)
   const [mascot, setMascot] = useState('🦸')

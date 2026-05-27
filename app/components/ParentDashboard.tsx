@@ -33,7 +33,7 @@ export default function ParentDashboard({ onNavigate }: ParentDashboardProps) {
   const [profile, setProfile] = useState<{ full_name: string; email: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const [newTask, setNewTask] = useState({ label: '', kid_id: '', frequency: 'Daily' })
-  const [newKid, setNewKid] = useState({ name: '', age: '', emoji: '🧒', prize_name: '', prize_emoji: '🎁' })
+  const [newKid, setNewKid] = useState({ name: '', age: '', emoji: '🧒', prize_name: '', prize_emoji: '🎁', pin: '' })
   const [addingKid, setAddingKid] = useState(false)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
@@ -90,8 +90,17 @@ export default function ParentDashboard({ onNavigate }: ParentDashboardProps) {
       body: JSON.stringify({ ...newKid, age: parseInt(newKid.age) || 8 }),
     })
     if (res.ok) {
+      const { kid } = await res.json()
+      // Set PIN if provided
+      if (newKid.pin && newKid.pin.length === 4 && kid?.id) {
+        await fetch('/api/kids/pin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kid_id: kid.id, pin: newKid.pin }),
+        })
+      }
       setMsg('Child added! ✅')
-      setNewKid({ name: '', age: '', emoji: '🧒', prize_name: '', prize_emoji: '🎁' })
+      setNewKid({ name: '', age: '', emoji: '🧒', prize_name: '', prize_emoji: '🎁', pin: '' })
       setAddingKid(false)
       loadData()
     } else {
@@ -323,6 +332,12 @@ export default function ParentDashboard({ onNavigate }: ParentDashboardProps) {
                     </button>
                   ))}
                 </div>
+              </div>
+              <div>
+                <label className="block text-xs font-extrabold text-gray-500 mb-1.5">4-Digit PIN for Child Login ⭐</label>
+                <input type="number" value={newKid.pin} onChange={e => setNewKid({...newKid, pin: e.target.value.slice(0,4)})} placeholder="e.g. 1234" maxLength={4}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl font-semibold outline-none focus:border-sky-300 transition-colors" />
+                <p className="text-xs text-gray-400 mt-1 font-semibold">Your child will use this PIN to log in on their device</p>
               </div>
               <button onClick={handleAddKid} disabled={saving}
                 className="w-full py-4 rounded-2xl font-extrabold text-white transition-all hover:-translate-y-0.5"

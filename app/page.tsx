@@ -8,6 +8,7 @@ import KidDashboard from './components/KidDashboard'
 export default function Home() {
   const [screen, setScreen] = useState('landing')
   const [authMode, setAuthMode] = useState('signup')
+  const [kidData, setKidData] = useState<any>(null)
 
   const navigate = (s: string, mode?: string) => {
     if (mode) setAuthMode(mode)
@@ -15,8 +16,13 @@ export default function Home() {
     window.scrollTo(0, 0)
   }
 
-  const handleAuth = (role: string) => {
-    navigate(role === 'kid' ? 'kid-dash' : 'parent-dash')
+  const handleAuth = (role: string, kid?: any) => {
+    if (role === 'kid' && kid) {
+      setKidData(kid)
+      navigate('kid-dash')
+    } else {
+      navigate('parent-dash')
+    }
   }
 
   return (
@@ -24,7 +30,7 @@ export default function Home() {
       {screen === 'landing' && <LandingPage onNavigate={navigate} />}
       {screen === 'auth' && <AuthScreen mode={authMode} onNavigate={navigate} onAuth={handleAuth} />}
       {screen === 'parent-dash' && <ParentDashboard onNavigate={navigate} />}
-      {screen === 'kid-dash' && <KidDashboard onNavigate={navigate} />}
+      {screen === 'kid-dash' && <KidDashboard onNavigate={navigate} kidData={kidData} />}
     </>
   )
 }
