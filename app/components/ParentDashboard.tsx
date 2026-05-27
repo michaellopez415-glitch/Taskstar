@@ -84,27 +84,20 @@ export default function ParentDashboard({ onNavigate }: ParentDashboardProps) {
   const handleAddKid = async () => {
     if (!newKid.name) { setMsg('Please enter your child\'s name!'); return }
     setSaving(true)
+    const { data: { user } } = await supabase.auth.getUser()
     const res = await fetch('/api/kids', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...newKid, age: parseInt(newKid.age) || 8 }),
+      body: JSON.stringify({ ...newKid, age: parseInt(newKid.age) || 8, parent_id: user?.id }),
     })
+    const data = await res.json()
     if (res.ok) {
-      const { kid } = await res.json()
-      // Set PIN if provided
-      if (newKid.pin && newKid.pin.length === 4 && kid?.id) {
-        await fetch('/api/kids/pin', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ kid_id: kid.id, pin: newKid.pin }),
-        })
-      }
       setMsg('Child added! ✅')
       setNewKid({ name: '', age: '', emoji: '🧒', prize_name: '', prize_emoji: '🎁', pin: '' })
       setAddingKid(false)
       loadData()
     } else {
-      setMsg('Error adding child. Please try again.')
+      setMsg(`Error: ${data.error || 'Please try again.'}`)
     }
     setSaving(false)
     setTimeout(() => setMsg(''), 3000)
